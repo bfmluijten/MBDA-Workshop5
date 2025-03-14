@@ -32,12 +32,16 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import nl.dibarto.workshop5.ui.theme.Workshop5Theme
 
 class MainActivity : ComponentActivity() {
-    var favorite by mutableIntStateOf(0)
+    private var favorite by mutableIntStateOf(0)
+
+    private var listenPreferenceJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,12 +85,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-
-        unbindService(serviceConnection)
-    }
-
     override fun onResume() {
         super.onResume()
 
@@ -94,7 +92,21 @@ class MainActivity : ComponentActivity() {
 
         startService(Intent(this, PokemonService::class.java))
 
-        listenPreference()
+        listenPreferenceJob = lifecycleScope.launch {
+            dataStore.data.map {
+                it[intPreferencesKey("favorite")]
+            }.cancellable().collect {
+                favorite = it ?: 0
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        unbindService(serviceConnection)
+
+        listenPreferenceJob?.cancel()
     }
 
     private var serviceConnection = object : ServiceConnection {
@@ -105,16 +117,6 @@ class MainActivity : ComponentActivity() {
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-        }
-    }
-
-    private fun listenPreference() {
-        lifecycleScope.launch {
-            dataStore.data.map {
-                it[intPreferencesKey("favorite")]
-            }.collect {
-                favorite = it ?: 0
-            }
         }
     }
 }
