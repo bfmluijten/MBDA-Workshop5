@@ -30,7 +30,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.map
@@ -95,12 +94,10 @@ class MainActivity : ComponentActivity() {
 
         startService(Intent(this, PokemonService::class.java))
 
-        listenPreference(intPreferencesKey("favorite")) {
-            favorite = it ?: 0
-        }
+        listenPreference()
     }
 
-    private var serviceConnection = object: ServiceConnection {
+    private var serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val binder = service as PokemonService.PokemonBinder
 
@@ -111,12 +108,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun <T> listenPreference(key: Preferences.Key<T>, listener: (T?) -> Unit) {
+    private fun listenPreference() {
         lifecycleScope.launch {
             dataStore.data.map {
-                it[key]
+                it[intPreferencesKey("favorite")]
             }.collect {
-                listener(it)
+                favorite = it ?: 0
             }
         }
     }
