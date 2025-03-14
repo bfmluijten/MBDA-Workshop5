@@ -12,12 +12,19 @@ import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.NotificationCompat
 import androidx.core.os.HandlerCompat.createAsync
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.runBlocking
 import java.util.Random
 
 const val FIVE_SECONDS = 5000
 
 const val POKEMON_NOTIFICATION: Int = 123456
 const val POKEMON_CHANNEL = "POKEMON_CHANNEL"
+
+val Context.dataStore by preferencesDataStore("settings")
 
 class PokemonService : Service() {
     private var favorite: Int = 0
@@ -52,11 +59,19 @@ class PokemonService : Service() {
         override fun run() {
             nextFavorite()
 
-            listener(favorite)
+//            listener(favorite)
+
+            savePreference(intPreferencesKey("favorite"), favorite)
 
             sendNotification(this@PokemonService)
 
             handler.postDelayed(this, FIVE_SECONDS.toLong())
+        }
+    }
+
+    fun <T> savePreference(key: Preferences.Key<T>, value: T) = runBlocking {
+        dataStore.edit {
+            it[key] = value
         }
     }
 

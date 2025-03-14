@@ -30,6 +30,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import nl.dibarto.workshop5.ui.theme.Workshop5Theme
 
 class MainActivity : ComponentActivity() {
@@ -89,6 +94,10 @@ class MainActivity : ComponentActivity() {
         bindService(Intent(this, PokemonService::class.java), serviceConnection, BIND_AUTO_CREATE)
 
         startService(Intent(this, PokemonService::class.java))
+
+        listenPreference(intPreferencesKey("favorite")) {
+            favorite = it ?: 0
+        }
     }
 
     private var serviceConnection = object: ServiceConnection {
@@ -99,6 +108,16 @@ class MainActivity : ComponentActivity() {
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
+        }
+    }
+
+    private fun <T> listenPreference(key: Preferences.Key<T>, listener: (T?) -> Unit) {
+        lifecycleScope.launch {
+            dataStore.data.map {
+                it[key]
+            }.collect {
+                listener(it)
+            }
         }
     }
 }
