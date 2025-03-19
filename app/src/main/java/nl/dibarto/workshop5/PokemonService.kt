@@ -16,8 +16,13 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.glance.appwidget.GlanceAppWidgetManager
+import kotlinx.coroutines.GlobalScope.coroutineContext
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.Random
+import kotlin.coroutines.coroutineContext
 
 const val FIVE_SECONDS = 5000
 
@@ -31,7 +36,7 @@ class PokemonService : Service() {
 
     private val binder = PokemonBinder()
 
-    inner class PokemonBinder: Binder() {
+    inner class PokemonBinder : Binder() {
         fun setListener(listener: (Int) -> Unit) {
             this@PokemonService.listener = listener
         }
@@ -65,6 +70,8 @@ class PokemonService : Service() {
 
             sendNotification(this@PokemonService)
 
+            updateWidget()
+
             handler.postDelayed(this, FIVE_SECONDS.toLong())
         }
     }
@@ -79,6 +86,17 @@ class PokemonService : Service() {
         val manager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
         manager.notify(POKEMON_NOTIFICATION, getNotification(context))
+    }
+
+    fun updateWidget() = runBlocking {
+        launch {
+            val manager = GlanceAppWidgetManager(this@PokemonService)
+            val widget = PokemonWidget()
+            val glanceIds = manager.getGlanceIds(widget.javaClass)
+            glanceIds.forEach { glanceId ->
+                widget.update(this@PokemonService, glanceId)
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
