@@ -69,13 +69,7 @@ class MainActivity : ComponentActivity() {
                                 .padding(innerPadding)
                                 .fillMaxWidth()
                                 .size(300.dp),
-                            painter = painterResource(
-                                id = when (favorite) {
-                                    0 -> R.drawable.bulbasaur
-                                    1 -> R.drawable.dragonite
-                                    else -> R.drawable.pikachu
-                                }
-                            ),
+                            painter = painterResource(getIcon(favorite)),
                             contentDescription = null
                         )
                         Spacer(modifier = Modifier.weight(1.0f))

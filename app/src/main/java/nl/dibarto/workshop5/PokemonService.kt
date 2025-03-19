@@ -16,18 +16,27 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import androidx.glance.appwidget.GlanceAppWidgetManager
-import kotlinx.coroutines.GlobalScope.coroutineContext
-import kotlinx.coroutines.coroutineScope
+import androidx.glance.appwidget.updateAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.Random
-import kotlin.coroutines.coroutineContext
 
 const val FIVE_SECONDS = 5000
 
 const val POKEMON_NOTIFICATION: Int = 123456
 const val POKEMON_CHANNEL = "POKEMON_CHANNEL"
+
+fun getIcon(favorite: Int): Int {
+    val icons = intArrayOf(R.drawable.bulbasaur, R.drawable.dragonite, R.drawable.pikachu)
+
+    return icons[favorite]
+}
+
+fun getName(favorite: Int): String {
+    val names = arrayOf("bulbasaur", "dragonite", "pikachu")
+
+    return names[favorite]
+}
 
 val Context.dataStore by preferencesDataStore("settings")
 
@@ -64,7 +73,7 @@ class PokemonService : Service() {
         override fun run() {
             nextFavorite()
 
-//            listener(favorite)
+            listener(favorite)
 
             savePreference(intPreferencesKey("favorite"), favorite)
 
@@ -90,12 +99,7 @@ class PokemonService : Service() {
 
     fun updateWidget() = runBlocking {
         launch {
-            val manager = GlanceAppWidgetManager(this@PokemonService)
-            val widget = PokemonWidget()
-            val glanceIds = manager.getGlanceIds(widget.javaClass)
-            glanceIds.forEach { glanceId ->
-                widget.update(this@PokemonService, glanceId)
-            }
+            PokemonWidget().updateAll(this@PokemonService)
         }
     }
 
@@ -120,17 +124,5 @@ class PokemonService : Service() {
             .setSmallIcon(R.mipmap.ic_launcher_round)
             .setLargeIcon(icon)
             .build()
-    }
-
-    private fun getIcon(favorite: Int): Int {
-        val icons = intArrayOf(R.drawable.bulbasaur, R.drawable.dragonite, R.drawable.pikachu)
-
-        return icons[favorite]
-    }
-
-    private fun getName(favorite: Int): String {
-        val names = arrayOf("bulbasaur", "dragonite", "pikachu")
-
-        return names[favorite]
     }
 }
