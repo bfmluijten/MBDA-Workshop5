@@ -33,7 +33,7 @@ class PokemonWidget : GlanceAppWidget() {
         }
     }
 
-    override val stateDefinition: GlanceStateDefinition<Preferences>?
+    override val stateDefinition: GlanceStateDefinition<Preferences>
         get() = object : GlanceStateDefinition<Preferences> {
             override suspend fun getDataStore(
                 context: Context,

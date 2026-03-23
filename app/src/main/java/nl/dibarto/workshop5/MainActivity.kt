@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(POKEMON_CHANNEL, "Name", NotificationManager.IMPORTANCE_LOW)
+            val channel = NotificationChannel(POKEMON_CHANNEL, "Name", NotificationManager.IMPORTANCE_HIGH)
             val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channel)
         }

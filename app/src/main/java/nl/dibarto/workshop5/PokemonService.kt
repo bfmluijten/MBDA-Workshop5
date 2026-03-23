@@ -24,7 +24,7 @@ import java.util.Random
 const val FIVE_SECONDS = 5000
 
 const val POKEMON_NOTIFICATION: Int = 123456
-const val POKEMON_CHANNEL = "POKEMON_CHANNEL"
+const val POKEMON_CHANNEL = "POKEMON_CHANNEL_V2"
 
 fun getIcon(favorite: Int): Int {
     val icons = intArrayOf(R.drawable.bulbasaur, R.drawable.dragonite, R.drawable.pikachu)
@@ -121,7 +121,7 @@ class PokemonService : Service() {
             .setContentTitle("Pokemon")
             .setContentText("Favorite: " + getName(favorite))
             .setContentIntent(pending)
-            .setSmallIcon(R.mipmap.ic_launcher_round)
+            .setSmallIcon(R.drawable.ic_stat_pokemon)
             .setLargeIcon(icon)
             .build()
     }
